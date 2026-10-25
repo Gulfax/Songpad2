@@ -1,0 +1,30 @@
+{
+  "name": "songpad",
+  "version": "1.0.0",
+  "description": "Lyrics notepad that listens to your melody and suggests keys and chord progressions.",
+  "main": "main.js",
+  "author": "Songpad",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist:win": "electron-builder --win --publish never"
+  },
+  "build": {
+    "appId": "com.songpad.app",
+    "productName": "Songpad",
+    "directories": { "output": "dist" },
+    "files": ["main.js", "www/**/*", "build/icon.png"],
+    "win": { "target": ["nsis", "portable"], "icon": "build/icon.png" },
+    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true, "perMachine": false },
+    "portable": { "artifactName": "Songpad-portable-${version}.exe" }
+  },
+  "devDependencies": {
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/cli": "^6.0.0",
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/filesystem": "^6.0.0",
+    "@capacitor/share": "^6.0.0",
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.0"
+  }
+}

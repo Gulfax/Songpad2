@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Songpad</title>
+<meta name="theme-color" content="#0e7c7b">
+<meta name="color-scheme" content="light dark">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-view="editor" data-tab="record" data-tool="record">
+<div id="app">
+  <aside id="list" aria-label="Notes">
+    <div class="list-head">
+      <h1>Songpad</h1>
+      <button id="newNote" class="btn primary" type="button">New note</button>
+    </div>
+    <input id="search" type="search" placeholder="Search notes" aria-label="Search notes">
+    <ul id="noteList"></ul>
+    <div class="list-foot">
+      <div class="foot-btns">
+        <button id="backupBtn" class="btn small" type="button">Back up all</button>
+        <label class="btn small" for="restoreFile">Restore</label>
+        <input id="restoreFile" type="file" accept=".json,application/json" hidden>
+      </div>
+      <p class="hint">Notes live on this device only. A backup file moves them to another device.</p>
+    </div>
+  </aside>
+
+  <main id="editor">
+    <header class="bar">
+      <button id="back" class="btn ghost small" type="button">&lsaquo; Notes</button>
+      <input id="title" class="title" placeholder="Song title" aria-label="Song title" autocomplete="off">
+      <span id="saved" class="muted" aria-live="polite"></span>
+      <details class="menu" id="moreMenu">
+        <summary class="btn ghost small">More</summary>
+        <div class="menu-pop">
+          <button id="exportTxt" class="btn ghost small" type="button">Export text</button>
+          <button id="delNote" class="btn ghost danger small" type="button">Delete note</button>
+        </div>
+      </details>
+    </header>
+
+    <section id="transport" aria-label="Record and beat">
+      <button id="recBtn" class="rec-btn" type="button" aria-pressed="false" aria-label="Start recording"><span></span></button>
+      <div class="t-live">
+        <div id="liveNote" class="live-note mono">&ndash;</div>
+        <div id="timer" class="mono muted">0:00</div>
+      </div>
+      <button id="playBtn" class="play-btn" type="button" aria-pressed="false" aria-label="Play beat"></button>
+      <div class="stepper" role="group" aria-label="Tempo">
+        <button id="bpmDown" class="step-btn" type="button" aria-label="Slower">&minus;</button>
+        <input id="bpm" type="number" min="40" max="220" inputmode="numeric" aria-label="Tempo in beats per minute">
+        <button id="bpmUp" class="step-btn" type="button" aria-label="Faster">+</button>
+        <span class="muted">BPM</span>
+      </div>
+      <button id="tapBtn" class="btn small" type="button">Tap</button>
+      <div class="toggles" role="group" aria-label="Beat options">
+        <button id="tClick" class="pill" type="button" aria-pressed="true">Click</button>
+        <button id="tDrums" class="pill" type="button" aria-pressed="false">Drums</button>
+        <button id="tCount" class="pill" type="button" aria-pressed="false">Count-in</button>
+      </div>
+    </section>
+
+    <div id="work">
+      <section id="paneLyrics" class="pane" aria-label="Lyrics">
+        <textarea id="lyrics" placeholder="Write lyrics here. Sing or hum a line, and Songpad finds the notes, the key and chords that fit." aria-label="Lyrics and notes"></textarea>
+      </section>
+
+      <section id="paneTools" class="pane" aria-label="Tools">
+        <nav id="tabsTop" class="tabs" role="tablist" aria-label="Tools">
+          <button type="button" role="tab" data-go="record">Record</button>
+          <button type="button" role="tab" data-go="beat">Beat</button>
+          <button type="button" role="tab" data-go="chords">Chords</button>
+          <button type="button" role="tab" data-go="voice">Voice</button>
+        </nav>
+
+        <div id="tab-record" class="tab" role="tabpanel">
+          <div class="live-card">
+            <div class="live-main">
+              <div id="liveBig" class="live-big mono">&ndash;</div>
+              <div class="live-meters">
+                <div class="cents" aria-hidden="true"><i id="centsDot"></i></div>
+                <div class="level" aria-hidden="true"><i id="levelBar"></i></div>
+              </div>
+            </div>
+            <canvas id="trail" height="84" aria-label="Pitch you are singing, last eight seconds"></canvas>
+          </div>
+          <div class="rec-actions">
+            <label class="btn small" for="importFile">Analyze an audio file</label>
+            <input id="importFile" type="file" accept="audio/*" hidden>
+            <span id="status" class="muted" aria-live="polite"></span>
+          </div>
+          <p class="hint">Sing or hum one note at a time. If a beat or click is on, wear headphones so Songpad does not hear it.</p>
+          <h2>Takes</h2>
+          <ul id="takeList"></ul>
+        </div>
+
+        <div id="tab-beat" class="tab" role="tabpanel">
+          <div class="beat-controls">
+            <div class="seg" id="barsSeg" role="group" aria-label="Pattern length">
+              <button type="button" data-bars="2">2 bars</button>
+              <button type="button" data-bars="3">3 bars</button>
+              <button type="button" data-bars="4">4 bars</button>
+            </div>
+            <label class="slider" for="swing">Swing <input id="swing" type="range" min="0" max="50" step="1"></label>
+            <label class="slider" for="vol">Volume <input id="vol" type="range" min="10" max="100" step="1"></label>
+            <button id="clearBeat" class="btn small" type="button">Clear</button>
+            <button id="repeatBar" class="btn small" type="button">Repeat bar 1</button>
+          </div>
+          <div id="barTabs" class="bar-tabs" role="group" aria-label="Bar"></div>
+          <div id="grid" class="grid" aria-label="Step sequencer"></div>
+          <p class="hint">Tap a step: loud, then soft, then off. Drag across steps to paint. Tap a drum name to hear it.</p>
+
+          <h2>Presets</h2>
+          <div class="preset-filters">
+            <div id="genreChips" class="chips" role="group" aria-label="Genre"></div>
+            <label class="check" for="moodSel">Mood <select id="moodSel"></select></label>
+            <button id="useTempo" class="pill" type="button" aria-pressed="true">Use preset tempo</button>
+          </div>
+          <div id="presetList" class="presets"></div>
+        </div>
+
+        <div id="tab-chords" class="tab" role="tabpanel">
+          <div id="analysis"></div>
+        </div>
+
+        <div id="tab-voice" class="tab" role="tabpanel">
+          <div id="voiceSummary"></div>
+          <div class="row">
+            <button id="measureBtn" class="btn" type="button">Measure my range</button>
+            <label class="check" for="vLow">Lowest <select id="vLow"></select></label>
+            <label class="check" for="vHigh">Highest <select id="vHigh"></select></label>
+          </div>
+          <p class="hint">To measure, press the button, sing your lowest comfortable note and hold it, then slide up and hold your highest comfortable note. Or choose the notes yourself.</p>
+          <div id="fitBox"></div>
+        </div>
+      </section>
+    </div>
+
+    <nav id="tabsBottom" class="tabs" role="tablist" aria-label="Sections">
+      <button type="button" role="tab" data-go="lyrics">Lyrics</button>
+      <button type="button" role="tab" data-go="record">Record</button>
+      <button type="button" role="tab" data-go="beat">Beat</button>
+      <button type="button" role="tab" data-go="chords">Chords</button>
+      <button type="button" role="tab" data-go="voice">Voice</button>
+    </nav>
+  </main>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="core.js"></script>
+<script src="beats.js"></script>
+<script src="audio.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
